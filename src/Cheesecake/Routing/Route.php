@@ -28,9 +28,23 @@ class Route implements IRoute
         return $this->data;
     }
 
-    public function getOptions()
+    /**
+     * @param string $key
+     * @return array|mixed
+     */
+    public function getOptions(string $key = null)
     {
-        return $this->options;
+        $return = $this->options;
+
+        if ($key !== null) {
+            if (!isset($this->options[$key])) {
+                $this->options[$key] = null;
+            }
+
+            $return = $this->options[$key];
+        }
+
+        return $return;
     }
 
     public function setData(array $data)

@@ -7,7 +7,6 @@ use Cheesecake\Exception\MalformedActionException;
 use Cheesecake\Exception\MethodNotExistsException;
 use Cheesecake\Exception\RouteIsEmptyException;
 use Cheesecake\Exception\RouteNotDefinedException;
-use Cheesecake\Routing\Route;
 
 /**
  * Class Router
@@ -22,7 +21,7 @@ use Cheesecake\Routing\Route;
 class Router
 {
 
-    private static $routes = [
+    public static $routes = [
         'GET' => [],
         'POST' => [],
         'PUT' => [],
@@ -36,11 +35,12 @@ class Router
     public static function __callStatic(string $name, array $arguments)
     {
         $route = self::$prefix . $arguments[0];
+        $route = trim($route, '/');
 
         if($arguments[1] === null) {
             $MatchedRoute = null;
 
-            foreach(self::$routes[$name] as $Route) {
+            foreach(self::$routes[strtoupper($name)] as $Route) {
                 if ($Route->match($route)) {
                     $MatchedRoute = $Route;
                     break;
@@ -66,7 +66,7 @@ class Router
 
             $Route->setOptions(array_merge(self::$routeOptions, $arguments[2]));
 
-            self::$routes[$name][$route] = $Route;
+            self::$routes[strtoupper($name)][$route] = $Route;
         }
     }
 
@@ -88,7 +88,7 @@ class Router
 
     public static function route(string $requestMethod, string $route)
     {
-        switch ($requestMethod) {
+        switch($requestMethod) {
             case 'GET': $Route = self::get($route); break;
             case 'POST': $Route = self::post($route); break;
             case 'PUT': $Route = self::put($route); break;
@@ -96,9 +96,28 @@ class Router
             case 'DELETE': $Route = self::delete($route); break;
         }
 
-        /**
-         * @TODO exec middlewares
-         */
+        $middlewares = $Route->getOptions('middleware');
+
+        if($middlewares !== null) {
+            if(!is_array($middlewares)) {
+                $middlewares = [$middlewares];
+            }
+
+            foreach($middlewares as $middleware) {
+                $Middleware = new $middleware();
+                $result = $Middleware->handle();
+
+                if ($result === false) {
+                    return [
+                        'error' => [
+                            'code' => 403,
+                            'message' => 'forbidden'
+                        ]
+                    ];
+                    break;
+                }
+            }
+        }
 
         $controllerName = '\App\Components\\'. self::getController($Route->getAction()) .'\Controller';
         $methodName = self::getMethod($Route->getAction());
@@ -118,49 +137,48 @@ class Router
             'method' => $methodName,
             'data' => $Route->getData()
         ];
-
-        return call_user_func_array([$Controller, $methodName], $Route->getData());
     }
 
+    /**
+     * @param string $action
+     * @return array
+     * @throws MalformedActionException
+     */
     private static function splitAction(string $action)
     {
         if (
             strpos($action, '@') === false
             || strpos($action, '@') === 0
         ) {
-            throw new MalformedActionException('Endpoint is malformed');
+            throw new MalformedActionException('Action is malformed');
         }
 
-        return ['controller' => $controller, 'method' => $method] = explode('@', $action);
+        [$controller, $method] = explode('@', $action);
+
+        return [
+            'controller' => $controller,
+            'method' => $method
+        ];
     }
 
     /**
-     * @param string $endpoint
+     * @param string $action
      * @return string
-     * @throws MalformedActionException
      */
     private static function getController(string $action): string
     {
         $splits = self::splitAction($action);
-var_dump($splits);
         return $splits['controller'];
     }
 
     /**
-     * @param string $endpoint
+     * @param string $action
      * @return string
-     * @throws MalformedActionException
      */
-    private static function getMethod(string $endpoint): string
+    private static function getMethod(string $action): string
     {
-        if (
-            strpos($endpoint, '@') === false
-            || strpos($endpoint, '@') === 0
-        ) {
-            throw new MalformedActionException('Action malformed');
-        }
-
-        return (explode('@', $endpoint))[1];
+        $splits = self::splitAction($action);
+        return $splits['method'];
     }
 
 }
