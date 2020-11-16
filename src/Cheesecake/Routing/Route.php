@@ -3,32 +3,80 @@
 
 namespace Cheesecake\Routing;
 
-
-class Route implements IRoute
+/**
+ * The Route represents a single route and their settings and options.
+ * Each route will be resolved to an action which will separate the
+ * controller and method by "@", e.g. Controller@Method
+ * Placeholders in the route will be stored in an array
+ *
+ * @package Cheesecake\Routing
+ * @author Christian Meyer <ak56Lk@gmx.net>
+ * @version 1.1
+ * @since 0.1
+ */
+class Route implements RouteInterface
 {
 
+    /**
+     * The route to match against.
+     * @var string
+     */
     private string $route;
+
+    /**
+     * The action the route will be resolved to.
+     * @var string
+     */
     private string $action;
+
+    /**
+     * Placeholders in the route will be stored in this array.
+     * @var array
+     */
     private array $data = [];
+
+    /**
+     * Options like middleware(s) will be stored in this array.
+     * @var array
+     */
     private array $options = [];
 
+    /**
+     * A route and an action will be needed to instantiate
+     * the Route object.
+     *
+     * @param string $route
+     * @param string $action
+     */
     public function __construct(string $route, string $action)
     {
         $this->route = $route;
         $this->action = $action;
     }
 
+    /**
+     * Returns the action
+     *
+     * @return string
+     */
     public function getAction(): string
     {
         return $this->action;
     }
 
-    public function getData()
+    /**
+     * Returnes the data
+     *
+     * @return array
+     */
+    public function getData(): array
     {
         return $this->data;
     }
 
     /**
+     * Returns the options
+     *
      * @param string $key
      * @return array|mixed
      */
@@ -47,21 +95,34 @@ class Route implements IRoute
         return $return;
     }
 
-    public function setData(array $data)
+    /**
+     * Sets the data
+     *
+     * @param array $data
+     */
+    public function setData(array $data): void
     {
         $this->data = $data;
     }
 
-    public function setOptions(array $options)
+    /**
+     * Sets the options
+     *
+     * @param array $options
+     */
+    public function setOptions(array $options): void
     {
         $this->options = $options;
     }
 
-    public function get()
-    {
-        return $this;
-    }
-
+    /**
+     * Tries to match against a given URI. It considers placeholders and found placeholders
+     * will be stored in the data array.
+     * If the URI matches the route it returns TRUE otherwise FALSE.
+     *
+     * @param string $uri The URI represents the called endpoint
+     * @return bool TRUE if the URI matches the route otherwise FALSE
+     */
     public function match(string $uri)
     {
         $uri = trim($uri, '/');

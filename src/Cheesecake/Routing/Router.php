@@ -9,8 +9,14 @@ use Cheesecake\Exception\RouteIsEmptyException;
 use Cheesecake\Exception\RouteNotDefinedException;
 
 /**
- * Class Router
+ * The Router registers the routes for each HTTP verb (GET, POST, PUT, PATCH & DELETE).
+ * Routes sharing the same options can be grouped and each option will be applied to
+ * the containing routes.
+ *
  * @package Cheesecake
+ * @author Christian Meyer <ak56Lk@gmx.net>
+ * @version 1.1
+ * @since 0.1
  *
  * @method static \Cheesecake\Routing\Route|void get(string $route, string $action = null, array $options = [])
  * @method static \Cheesecake\Routing\Route|void post(string $route, string $action = null, array $options = [])
@@ -21,7 +27,12 @@ use Cheesecake\Exception\RouteNotDefinedException;
 class Router
 {
 
-    public static $routes = [
+    /**
+     * This array contains all registered routes for each HTTP verb.
+     *
+     * @var array[]
+     */
+    public static array $routes = [
         'GET' => [],
         'POST' => [],
         'PUT' => [],
@@ -29,9 +40,41 @@ class Router
         'DELETE' => []
     ];
 
-    private static $prefix;
-    private static $routeOptions = [];
+    /**
+     * The prefix which will be applied to all routes contained in a group.
+     *
+     * @var string
+     */
+    private static ?string $prefix = null;
 
+    /**
+     * All options for each route contained in a group
+     *
+     * @var array
+     */
+    private static array $routeOptions = [];
+
+    /**
+     * The arguments are:
+     * <pre>
+     * 0: route
+     * 1: action
+     * 3: options
+     * </pre>
+     *
+     * If argument 1 is null then it will try to match a registered route.
+     * If argument 1 is not null then a new route will be registered
+     *
+     * @param string $name Name of the called method (get, post, put, patch, delete)
+     * @param array $arguments <pre>
+     * 0: route
+     * 1: action
+     * 2: options
+     * </pre>
+     * @return mixed
+     * @throws RouteIsEmptyException
+     * @throws RouteNotDefinedException
+     */
     public static function __callStatic(string $name, array $arguments)
     {
         $route = self::$prefix . $arguments[0];
@@ -70,7 +113,15 @@ class Router
         }
     }
 
-    public static function group(array $sharedOptions, callable $callback)
+    /**
+     * A group applies shared options to all containing routes. The routes will be
+     * registered via a callable like a function.
+     * Currently supported is a prefix and middleware(s)
+     *
+     * @param array $sharedOptions define shared options (currently prefix and middleware)
+     * @param callable $callback In the callable the routes will be registered
+     */
+    public static function group(array $sharedOptions, callable $callback): void
     {
         if(isset($sharedOptions['prefix'])) {
             self::$prefix = $sharedOptions['prefix'];
@@ -86,7 +137,22 @@ class Router
         self::$routeOptions = [];
     }
 
-    public static function route(string $requestMethod, string $route)
+    /**
+     * Tries to match a route of the given HTTP verb for a given route.
+     * Middlewares will be applied and then it will try to find a controller
+     * and try to call a method.
+     * If the controller does not exist a ControllerNotExistsException will be
+     * thrown.
+     * If the method in the controller does not exist a MethodNotExistsException
+     * will be thrown.
+     *
+     * @param string $requestMethod
+     * @param string $route
+     * @return array
+     * @throws ControllerNotExistsException
+     * @throws MethodNotExistsException
+     */
+    public static function route(string $requestMethod, string $route): array
     {
         switch($requestMethod) {
             case 'GET': $Route = self::get($route); break;
@@ -140,11 +206,16 @@ class Router
     }
 
     /**
+     * Splits the action at the "@". If no @ is in the action or begins with an @ then
+     * a MalformedActionException will be thrown.
+     * If the string can be splitted successful then an array with the keys "controller"
+     * and "method" will be returned.
+     *
      * @param string $action
      * @return array
      * @throws MalformedActionException
      */
-    private static function splitAction(string $action)
+    private static function splitAction(string $action): array
     {
         if (
             strpos($action, '@') === false
@@ -162,8 +233,11 @@ class Router
     }
 
     /**
-     * @param string $action
+     * Gets the extracted controller of the action
+     *
+     * @param string $action The action string of the route
      * @return string
+     * @uses \Cheesecake\Routing\Router::splitAction()
      */
     private static function getController(string $action): string
     {
@@ -172,8 +246,11 @@ class Router
     }
 
     /**
+     * Gets the extracted method of the action
+     *
      * @param string $action
      * @return string
+     * @uses \Cheesecake\Routing\Router::splitAction()
      */
     private static function getMethod(string $action): string
     {
