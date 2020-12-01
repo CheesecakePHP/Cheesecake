@@ -1,5 +1,5 @@
 {
-  "name": "cheesecake/crust",
+  "name": "cheesecake/cheesecake",
   "description": "REST API Framework written in PHP",
   "type": "module",
   "require": {
