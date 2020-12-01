@@ -1,0 +1,17 @@
+{
+  "name": "cheesecake/crust",
+  "description": "REST API Framework written in PHP",
+  "type": "module",
+  "require": {
+    "php": ">=7.4.0",
+    "cheesecake/routing": "0.1"
+  },
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Christian Meyer",
+      "email": "ak56Lk@gmx.net"
+    }
+  ],
+  "minimum-stability": "dev"
+}
