@@ -4,8 +4,8 @@
   "type": "module",
   "require": {
     "php": ">=7.4.0",
-    "cheesecake/routing",
-    "cheesecake/validators"
+    "cheesecake/routing":"0.1",
+    "cheesecake/validators":"dev-main"
   },
   "license": "Apache-2.0",
   "authors": [
