@@ -5,7 +5,7 @@
   "require": {
     "php": ">=7.4.0",
     "cheesecake/routing":"0.1",
-    "cheesecake/validators":"dev"
+    "cheesecake/validators":"*"
   },
   "license": "Apache-2.0",
   "authors": [
