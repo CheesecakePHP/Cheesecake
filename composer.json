@@ -6,7 +6,7 @@
     "php": ">=7.4.0",
     "cheesecake/routing":"~0.1",
     "cheesecake/validators":"^1.0",
-    "cheesecake/http": "^1.0"
+    "cheesecake/http": "~1.0"
   },
   "license": "Apache-2.0",
   "authors": [
@@ -15,5 +15,5 @@
       "email": "ak56Lk@gmx.net"
     }
   ],
-  "minimum-stability": "dev"
+  "minimum-stability": "stable"
 }
