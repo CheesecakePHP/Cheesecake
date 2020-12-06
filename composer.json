@@ -8,6 +8,11 @@
     "cheesecake/validators":"^1.0",
     "cheesecake/http": "~1.0"
   },
+  "autoload": {
+      "psr-4": {
+          "Cheesecake\\": "src"
+      }
+  },
   "license": "Apache-2.0",
   "authors": [
     {
