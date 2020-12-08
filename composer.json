@@ -5,7 +5,7 @@
   "require": {
     "php": ">=7.4.0",
     "cheesecake/crust": "~1.0",
-    "cheesecake/routing":"~0.1",
+    "cheesecake/routing":"~1.0",
     "cheesecake/validators":"~1.0",
     "cheesecake/http": "~1.0"
   },
