@@ -10,16 +10,13 @@ use Cheesecake\Http\Response;
 use Cheesecake\Routing\Router;
 
 try {
-    Router::get('ping', 'Test@ping');
+    $dir = new DirectoryIterator('src/routes/');
 
-    Router::group([
-        'prefix' => 'v1/',
-        'middleware' => \App\Middleware\Auth::class
-    ], function() {
-        Router::get('user/{id}', 'User@get');
-        Router::get('user/{id}/edit', 'User@edit');
-        Router::get('user/{id}/edit/{identifier}', 'User@edit');
-    });
+    foreach ($dir as $fileinfo) {
+        if (!$fileinfo->isDot()) {
+            include_once($fileinfo->getPathname());
+        }
+    }
 
     $CheesecakeCrust = new Crust(Router::route(Request::requestMethod(), Request::requestUri()));
 
